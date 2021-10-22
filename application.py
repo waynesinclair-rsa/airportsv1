@@ -23,8 +23,8 @@ def after_request(response):
     diff_miliseconds = diff_seconds * 1000
     if (response.response.__class__ is list):
         diag = "Execution time: %.2fms | Database queries: %s" % (diff_miliseconds ,query_count)
-        new_response = response.response[0].replace('__DIAGNOSTICS__', diag)
-        response.set_data(new_response)
+        new_response = response.response[0].decode().replace('__DIAGNOSTICS__', diag)
+        response.set_data(new_response.encode())
     return response
 
 @application.route("/")
@@ -47,7 +47,7 @@ def city(city_id):
     else:
         cities = naive_cache["cities"]
     if city_id not in naive_cache:
-        city = filter(lambda c: c['id'] == city_id, cities)
+        city = list(filter(lambda c: c['id'] == city_id, cities))
         if len(city) < 1:
             abort(404)
         latlng = (city[0]['latitude'], city[0]['longitude'])
